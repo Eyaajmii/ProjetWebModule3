@@ -1,0 +1,154 @@
+/**
+ * CSS - Fiche Étudiante Complète (Partie 3.1)
+ * Styles spécifiques pour profil_etudiant.php
+ *
+ * @author AJMI Eya, JLASSI MARIEM
+ * @version 1.0
+ */
+
+/* ============================================================================
+   FORMULAIRE DE PROFIL
+   ============================================================================ */
+.profile-form {
+    margin-bottom: 2rem;
+}
+
+.profile-tabs-content {
+    padding: 1.5rem 0;
+}
+
+.tab-pane {
+    display: none;
+}
+
+.tab-pane.active {
+    display: block;
+    animation: fadeIn 0.3s;
+}
+
+/* Mode édition */
+.form-control.editable[readonly] {
+    background-color: var(--gray-50);
+    cursor: default;
+}
+
+.form-control.editable:not([readonly]):not([disabled]),
+select.editable:not([disabled]) {
+    background-color: var(--white);
+    border-color: var(--primary-blue-light);
+}
+
+/* ============================================================================
+   CARTES DE CONTACTS D'URGENCE
+   ============================================================================ */
+.contacts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.contact-card {
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    padding: 1.5rem;
+    position: relative;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.contact-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.contact-card.contact-principal {
+    border-color: var(--primary-blue);
+    border-width: 2px;
+    background: linear-gradient(to bottom right, rgba(0, 86, 179, 0.02), var(--white));
+}
+
+.contact-card h4 {
+    color: var(--gray-800);
+    margin-bottom: 0.75rem;
+    font-size: 1.125rem;
+}
+
+.contact-relation {
+    color: var(--primary-blue);
+    font-weight: 500;
+    margin-bottom: 0.75rem;
+}
+
+.contact-info {
+    margin-bottom: 0.5rem;
+    color: var(--gray-700);
+    line-height: 1.5;
+}
+
+.contact-info strong {
+    color: var(--gray-800);
+    font-weight: 600;
+}
+
+.contact-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--gray-200);
+}
+
+/* ============================================================================
+   ACTIONS DU FORMULAIRE
+   ============================================================================ */
+.form-actions {
+    position: sticky;
+    bottom: 0;
+    background: var(--white);
+    padding: 1.5rem;
+    border-top: 2px solid var(--gray-200);
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+    z-index: 100;
+}
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+@media (max-width: 768px) {
+    .contacts-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions button {
+        width: 100%;
+    }
+}
+
+/* ============================================================================
+   IMPRESSION
+   ============================================================================ */
+@media print {
+    .form-actions,
+    .contact-actions,
+    .nav-tabs,
+    #btnModeEdition {
+        display: none !important;
+    }
+
+    .contact-card {
+        page-break-inside: avoid;
+    }
+
+    .contacts-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+}
