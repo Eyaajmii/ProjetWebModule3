@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Fonctions Helper - Module Étudiants
  * Projet ERP Iteam University
@@ -72,7 +73,8 @@ define('TYPES_ETABLISSEMENTS', [
 /**
  * Fonction pour obtenir la connexion BD (compatible avec config.php existant)
  */
-function getDB() {
+function getDB()
+{
     global $pdo;
     return $pdo;
 }
@@ -80,14 +82,16 @@ function getDB() {
 /**
  * Fonction pour sécuriser les sorties HTML
  */
-function echapper($string) {
+function echapper($string)
+{
     return htmlspecialchars($string ?? '', ENT_QUOTES, 'UTF-8');
 }
 
 /**
  * Fonction pour formater une date
  */
-function formaterDate($date, $format = 'd/m/Y') {
+function formaterDate($date, $format = 'd/m/Y')
+{
     if (empty($date)) return '-';
     $timestamp = is_numeric($date) ? $date : strtotime($date);
     return date($format, $timestamp);
@@ -96,7 +100,8 @@ function formaterDate($date, $format = 'd/m/Y') {
 /**
  * Fonction pour formater la taille d'un fichier
  */
-function formaterTaille($bytes) {
+function formaterTaille($bytes)
+{
     if ($bytes >= 1048576) {
         return round($bytes / 1048576, 2) . ' MB';
     } elseif ($bytes >= 1024) {
@@ -108,7 +113,8 @@ function formaterTaille($bytes) {
 /**
  * Fonction pour obtenir le badge HTML d'un statut
  */
-function getBadgeStatut($statut, $type = 'document') {
+function getBadgeStatut($statut, $type = 'document')
+{
     $badges = [
         'document' => [
             'en_attente' => '<span class="badge badge-warning">En attente</span>',
@@ -129,7 +135,8 @@ function getBadgeStatut($statut, $type = 'document') {
 /**
  * Fonction pour générer un nom de fichier unique et sécurisé
  */
-function genererNomFichier($nomOriginal, $etudiantId) {
+function genererNomFichier($nomOriginal, $etudiantId)
+{
     $extension = strtolower(pathinfo($nomOriginal, PATHINFO_EXTENSION));
     $nomBase = pathinfo($nomOriginal, PATHINFO_FILENAME);
     $nomSecurise = preg_replace('/[^a-zA-Z0-9_-]/', '_', $nomBase);
@@ -141,7 +148,8 @@ function genererNomFichier($nomOriginal, $etudiantId) {
 /**
  * Fonction pour vérifier si l'utilisateur est connecté
  */
-function verifierConnexion() {
+function verifierConnexion()
+{
     if (!isset($_SESSION['utilisateur_id'])) {
         header('Location: ../../authentification/connexion.php');
         exit();
@@ -151,7 +159,8 @@ function verifierConnexion() {
 /**
  * Fonction pour vérifier les permissions (étudiant ou admin)
  */
-function verifierPermission($etudiantId, $requireAdmin = false) {
+function verifierPermission($etudiantId, $requireAdmin = false)
+{
     $role = $_SESSION['role'] ?? '';
     $userId = $_SESSION['utilisateur_id'] ?? 0;
 
@@ -177,7 +186,8 @@ function verifierPermission($etudiantId, $requireAdmin = false) {
 /**
  * Fonction pour envoyer une réponse JSON
  */
-function envoyerJSON($data, $statusCode = 200) {
+function envoyerJSON($data, $statusCode = 200)
+{
     http_response_code($statusCode);
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
@@ -187,7 +197,8 @@ function envoyerJSON($data, $statusCode = 200) {
 /**
  * Fonction pour valider un fichier uploadé
  */
-function validerFichier($file) {
+function validerFichier($file)
+{
     $errors = [];
 
     // Vérifier les erreurs d'upload
@@ -224,7 +235,8 @@ function validerFichier($file) {
 /**
  * Fonction pour créer le répertoire d'upload d'un étudiant
  */
-function creerRepertoireEtudiant($etudiantId) {
+function creerRepertoireEtudiant($etudiantId)
+{
     $dir = UPLOAD_DIR . $etudiantId . '/';
 
     if (!file_exists($dir)) {
@@ -243,7 +255,8 @@ function creerRepertoireEtudiant($etudiantId) {
 /**
  * Fonction pour logger les erreurs
  */
-function loggerErreur($message, $contexte = []) {
+function loggerErreur($message, $contexte = [])
+{
     $logDir = dirname(__DIR__) . '/logs/';
 
     if (!file_exists($logDir)) {
@@ -260,7 +273,8 @@ function loggerErreur($message, $contexte = []) {
 /**
  * Fonction pour obtenir l'ID de l'étudiant connecté
  */
-function getEtudiantIdConnecte() {
+function getEtudiantIdConnecte()
+{
     if (!isset($_SESSION['utilisateur_id'])) {
         return null;
     }
@@ -276,7 +290,8 @@ function getEtudiantIdConnecte() {
 /**
  * Fonction pour nettoyer les données POST
  */
-function nettoyerInput($data) {
+function nettoyerInput($data)
+{
     if (is_array($data)) {
         return array_map('nettoyerInput', $data);
     }
@@ -286,14 +301,16 @@ function nettoyerInput($data) {
 /**
  * Fonction pour valider un email
  */
-function validerEmail($email) {
+function validerEmail($email)
+{
     return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
 }
 
 /**
  * Fonction pour valider un numéro de téléphone tunisien
  */
-function validerTelephone($tel) {
+function validerTelephone($tel)
+{
     // Format tunisien: +216 XX XXX XXX ou 00216 XX XXX XXX ou XX XXX XXX
     $tel = preg_replace('/\s+/', '', $tel);
     return preg_match('/^(\+216|00216|0)?[2-9]\d{7}$/', $tel);
@@ -302,7 +319,8 @@ function validerTelephone($tel) {
 /**
  * Fonction pour créer une notification
  */
-function creerNotification($utilisateur_id, $titre, $message, $type = 'information', $url_action = null) {
+function creerNotification($utilisateur_id, $titre, $message, $type = 'information', $url_action = null)
+{
     $db = getDB();
     $stmt = $db->prepare("
         INSERT INTO notifications (utilisateur_id, titre, message, type, url_action)

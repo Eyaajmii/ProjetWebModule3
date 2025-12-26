@@ -1,17 +1,6 @@
 <?php
 include "includes/config.php";
-function est_connecte()
-{
-    return isset($_SESSION['user_id']);
-}
-function rediriger_si_non_connecte()
-{
-    if (!est_connecte()) {
-        header('Location: connexion.php');
-        exit();
-    }
-}
-function GetHistorique($etudiant_id)
+function GetParcoursAcademique($etudiant_id)
 {
     try {
         $pdo = new PDO(

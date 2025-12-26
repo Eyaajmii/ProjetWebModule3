@@ -1,17 +1,18 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 define('DB_HOST', 'localhost');
 define('DB_NAME', 'iteam_university');
 define('DB_USER', 'root');
 define('DB_PASS', '');
 try {
- $pdo = new PDO(
- "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8",
- DB_USER,
- DB_PASS
- );
- $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch(PDOException $e) {
- die("Erreur de connexion : " . $e->getMessage());
+    $pdo = new PDO(
+        "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8",
+        DB_USER,
+        DB_PASS
+    );
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    die("Erreur de connexion : " . $e->getMessage());
 }
-?>

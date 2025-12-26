@@ -1,10 +1,14 @@
 <?php
 include "api/obtenir_donnees_academiques.php";
-//rediriger_si_non_connecte();
+include "includes/fonctions_helpers.php";
+verifierConnexion();
+include 'includes/header.php';
+
+$etudiant_id = isset($_GET['id']) ? intval($_GET['id']) : getEtudiantIdConnecte();
 //$etudiant_id = $_GET['id'];
-$etudiant_id = intval($_GET['id']);//pourrr le tesssst
-//$historiqueAcademique = GetHistorique($_SESSION['etudiant_id']);
-$historiqueAcademique = GetHistorique($etudiant_id);//pourle test
+//$etudiant_id = intval($_GET['id']);//pourrr le tesssst
+//$historiqueAcademique = GetParcoursAcademique($_SESSION['etudiant_id']);
+$historiqueAcademique = GetParcoursAcademique($etudiant_id);
 $historiques = [];
 $creditparanne = [];
 $creditparsemestre = [];
@@ -81,85 +85,83 @@ foreach ($historiques as $annee => $semestres) {
 ?>
 <h2>Historique académique</h2>
 
-<table border="1" cellpadding="6" cellspacing="0">
-    <tr>
-        <th>Année</th>
-        <th>Semestre</th>
-        <th>Cours</th>
-        <th>Note</th>
-        <th>ECTS acquis</th>
-        <th>Statut</th>
-        <th>Total ECTS semestre</th>
-        <th>Moyenne semestrielles</th>
-        <th>Total ECTS année</th>
-        <th>Moyenne annuelle</th>
-    </tr>
+<div class="table-container">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Année</th>
+                <th>Semestre</th>
+                <th>Cours</th>
+                <th>Note</th>
+                <th>ECTS acquis</th>
+                <th>Statut</th>
+                <th>Total ECTS semestre</th>
+                <th>Moyenne semestrielle</th>
+                <th>Total ECTS année</th>
+                <th>Moyenne annuelle</th>
+                <th>Relevé</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($historiques as $annee => $semestres): ?>
+                <?php
+                $rowspanAnnee = 0;
+                foreach ($semestres as $semestre => $coursSemestre) $rowspanAnnee += count($coursSemestre);
+                $anneeAffichee = false;
+                ?>
+                <?php foreach ($semestres as $semestre => $coursSemestre): ?>
+                    <?php
+                    $rowspanSemestre = count($coursSemestre);
+                    $semestreAffichee = false;
+                    $sommeNotesSemestre = array_sum(array_column($coursSemestre, 'note'));
+                    $nbCoursSemestre = count($coursSemestre);
+                    $moyenneSemestre = $nbCoursSemestre ? round($sommeNotesSemestre / $nbCoursSemestre, 2) : 0;
+                    ?>
+                    <?php foreach ($coursSemestre as $cours): ?>
+                        <tr>
+                            <?php if (!$anneeAffichee): ?>
+                                <td rowspan="<?= $rowspanAnnee ?>"><?= htmlspecialchars($annee) ?></td>
+                                <?php $anneeAffichee = true; ?>
+                            <?php endif; ?>
 
-    <?php foreach ($historiques as $annee => $semestres): ?>
-        <?php
-        $rowspanAnnee = 0;
-        foreach ($semestres as $coursSemestre) $rowspanAnnee += count($coursSemestre);
-        $anneeAffichee = false;
-        ?>
+                            <?php if (!$semestreAffichee): ?>
+                                <td rowspan="<?= $rowspanSemestre ?>"><?= htmlspecialchars($semestre) ?></td>
+                                <?php $semestreAffichee = true; ?>
+                            <?php endif; ?>
 
-        <?php foreach ($semestres as $semestre => $coursSemestre): ?>
-            <?php
-            $rowspanSemestre = count($coursSemestre);
-            $semestreAffichee = false;
+                            <td><?= htmlspecialchars($cours['cours']) ?></td>
+                            <td><?= $cours['note'] ?></td>
+                            <td><?= ($cours['statut'] === 'valide') ? $cours['credits_ects'] : 0 ?></td>
+                            <td><?= htmlspecialchars($cours['statut']) ?></td>
 
-            $sommeNotesSemestre = 0;
-            $nbCoursSemestre = 0;
-            foreach ($coursSemestre as $c) {
-                $sommeNotesSemestre += $c['note'];
-                $nbCoursSemestre++;
-            }
-            $moyenneSemestre = $nbCoursSemestre ? round($sommeNotesSemestre / $nbCoursSemestre, 2) : 0;
-            ?>
+                            <?php if ($semestreAffichee && !isset($semTotalAffiche[$annee][$semestre])): ?>
+                                <td rowspan="<?= $rowspanSemestre ?>"><?= $creditparsemestre[$annee][$semestre] ?></td>
+                                <td rowspan="<?= $rowspanSemestre ?>"><?= $moyenneSemestre ?></td>
+                                <?php $semTotalAffiche[$annee][$semestre] = true; ?>
+                            <?php endif; ?>
 
-            <?php foreach ($coursSemestre as $cours): ?>
-                <tr>
-                    <?php if (!$anneeAffichee): ?>
-                        <td rowspan="<?= $rowspanAnnee ?>"><?= htmlspecialchars($annee) ?></td>
-                        <?php $anneeAffichee = true; ?>
-                    <?php endif; ?>
-
-                    <?php if (!$semestreAffichee): ?>
-                        <td rowspan="<?= $rowspanSemestre ?>"><?= htmlspecialchars($semestre) ?></td>
-                        <?php $semestreAffichee = true; ?>
-                    <?php endif; ?>
-
-                    <td><?= htmlspecialchars($cours['cours']) ?></td>
-                    <td><?= $cours['note'] ?></td>
-                    <td><?= ($cours['statut'] === 'valide') ? $cours['credits_ects'] : 0 ?></td>
-                    <td><?= htmlspecialchars($cours['statut']) ?></td>
-
-                    <?php if ($semestreAffichee && !isset($semTotalAffiche[$annee][$semestre])): ?>
-                        <td rowspan="<?= $rowspanSemestre ?>"><?= $creditparsemestre[$annee][$semestre] ?></td>
-                        <td rowspan="<?= $rowspanSemestre ?>"><?= $moyenneSemestre ?></td>
-                        <?php $semTotalAffiche[$annee][$semestre] = true; ?>
-                    <?php endif; ?>
-
-                    <?php if ($anneeAffichee && !isset($anneeTotalAffiche[$annee])): ?>
-                        <td rowspan="<?= $rowspanAnnee ?>"><?= $creditparanne[$annee] ?></td>
-                        <td rowspan="<?= $rowspanAnnee ?>"><?= $moyenneAnnee[$annee]['moyenne'] ?></td>
-                        <td rowspan="<?= $rowspanAnnee ?>"><a href="rapports/releve_notes.php?id=<?= $etudiant_id ?>&annee=<?= $annee ?>" target="_blank">Télécharger relevé de note</a></td>
-                        <?php $anneeTotalAffiche[$annee] = true; ?>
-                    <?php endif; ?>
-                </tr>
+                            <?php if ($anneeAffichee && !isset($anneeTotalAffiche[$annee])): ?>
+                                <td rowspan="<?= $rowspanAnnee ?>"><?= $creditparanne[$annee] ?></td>
+                                <td rowspan="<?= $rowspanAnnee ?>"><?= $moyenneAnnee[$annee]['moyenne'] ?></td>
+                                <td rowspan="<?= $rowspanAnnee ?>">
+                                    <a href="rapports/releve_notes.php?id=<?= $etudiant_id ?>&annee=<?= $annee ?>" class="btn-download" target="_blank">Télécharger</a>
+                                </td>
+                                <?php $anneeTotalAffiche[$annee] = true; ?>
+                            <?php endif; ?>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php endforeach; ?>
             <?php endforeach; ?>
+        </tbody>
+    </table>
 
-        <?php endforeach; ?>
-    <?php endforeach; ?>
-</table>
+</div>
 
+<canvas id="progression" style="width: 80%;max-width: 800px;margin: 30px auto;"></canvas>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<canvas id="progression" style="width: 80%;max-width: 800px;margin: 30px auto; "></canvas>
-
 <script>
     const ctx = document.getElementById('progression').getContext('2d');
-
     new Chart(ctx, {
         type: 'line',
         data: {

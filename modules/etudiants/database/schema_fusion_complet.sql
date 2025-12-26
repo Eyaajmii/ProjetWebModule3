@@ -146,6 +146,31 @@ CREATE TABLE cours (
     INDEX idx_code_cours (code_cours),
     INDEX idx_departement (departement)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+-- ============================================================================
+-- TABLE X: SESSIONS DE COURS (Partie 3.4 - Suivi des absences)
+-- ============================================================================
+
+CREATE TABLE sessions_cours (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    cours_id INT NOT NULL,
+    professeur_id INT NOT NULL,
+    date_session DATE NOT NULL,
+    heure_debut TIME,
+    heure_fin TIME,
+    salle VARCHAR(50),
+    type_session ENUM('cours', 'td', 'tp') DEFAULT 'cours',
+    date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_session_cours
+        FOREIGN KEY (cours_id) REFERENCES cours(id) ON DELETE CASCADE,
+
+    CONSTRAINT fk_session_professeur
+        FOREIGN KEY (professeur_id) REFERENCES professeurs(id) ON DELETE CASCADE,
+
+    INDEX idx_cours_session (cours_id),
+    INDEX idx_prof_session (professeur_id),
+    INDEX idx_date_session (date_session)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================================
 -- TABLE 7: PARCOURS ACADÉMIQUES (Partie 3.2 - Autre équipe + Collègue)
@@ -248,12 +273,13 @@ CREATE TABLE documents_etudiants (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================================
--- TABLE 11: PRÉSENCE ÉTUDIANTS (Partie 3.4 - Autre équipe + Collègue)
+-- TABLE 11: PRÉSENCE ÉTUDIANTS (MISE À JOUR)
 -- ============================================================================
+
 CREATE TABLE presence_etudiants (
     id INT PRIMARY KEY AUTO_INCREMENT,
     etudiant_id INT NOT NULL,
-    session_cours_id INT,
+    session_cours_id INT NOT NULL,
     date DATE NOT NULL,
     statut ENUM('present', 'absent', 'justifie') DEFAULT 'absent',
     justification TEXT,
@@ -263,10 +289,15 @@ CREATE TABLE presence_etudiants (
 
     CONSTRAINT fk_presence_etudiant
         FOREIGN KEY (etudiant_id) REFERENCES etudiants(id) ON DELETE CASCADE,
+
+    CONSTRAINT fk_presence_session
+        FOREIGN KEY (session_cours_id) REFERENCES sessions_cours(id) ON DELETE CASCADE,
+
     CONSTRAINT fk_presence_enregistreur
         FOREIGN KEY (enregistre_par) REFERENCES utilisateurs(id) ON DELETE SET NULL,
 
     INDEX idx_etudiant_presence (etudiant_id),
+    INDEX idx_session_presence (session_cours_id),
     INDEX idx_date_presence (date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -362,7 +393,12 @@ INSERT INTO cours (code_cours, nom_cours, departement, credits_ects, semestre) V
 ('WEB101', 'Développement Web', 'Informatique', 6, 1),
 ('JAVA201', 'Programmation Java', 'Informatique', 6, 2),
 ('BDD301', 'Bases de Données', 'Informatique', 6, 3);
-
+INSERT INTO sessions_cours
+(cours_id, professeur_id, date_session, heure_debut, heure_fin, salle, type_session)
+VALUES
+(1, 1, '2024-12-20', '08:00', '10:00', 'Salle A1', 'cours'),
+(1, 1, '2024-12-27', '08:00', '10:00', 'Salle A1', 'td'),
+(2, 2, '2024-12-21', '10:00', '12:00', 'Salle B2', 'cours');
 -- Parcours académiques
 INSERT INTO parcours_academiques (etudiant_id, annee_academique, semestre, cours_id, note, credits_ects, statut) VALUES
 (1, 2024, 1, 1, 14.50, 6, 'valide'),
